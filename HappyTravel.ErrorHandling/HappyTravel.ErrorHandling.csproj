@@ -9,8 +9,8 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Company>Happytravel.com</Company>
     <Version>1.0.0</Version>
-    <PackageProjectUrl>https://github.com/happy-travel/location-name-normalizer</PackageProjectUrl>
-    <RepositoryURL>https://github.com/happy-travel/location-name-normalizer</RepositoryURL>    
+    <PackageProjectUrl>https://github.com/happy-travel/error-handling</PackageProjectUrl>
+    <RepositoryURL>https://github.com/happy-travel/error-handling</RepositoryURL>    
   </PropertyGroup>
 
   <ItemGroup>
