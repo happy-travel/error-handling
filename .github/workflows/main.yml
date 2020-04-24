@@ -24,4 +24,4 @@ jobs:
       shell: bash
 
     - name: Push generated package to GitHub registry
-      run: nuget push ..\location-name-normalizer\HappyTravel.ErrorHandling\bin\Release\*.nupkg -Source "GPR"
+      run: nuget push ..\error-handling\HappyTravel.ErrorHandling\bin\Release\*.nupkg -Source "GPR"
