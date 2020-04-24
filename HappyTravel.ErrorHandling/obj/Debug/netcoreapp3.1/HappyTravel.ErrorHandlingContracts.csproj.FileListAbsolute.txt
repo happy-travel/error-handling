@@ -1,0 +1,9 @@
+E:\Projects\happy-travel\HappyTravel.ErrorHandlingContracts\HappyTravel.ErrorHandlingContracts\bin\Debug\netcoreapp3.1\HappyTravel.ErrorHandlingContracts.deps.json
+E:\Projects\happy-travel\HappyTravel.ErrorHandlingContracts\HappyTravel.ErrorHandlingContracts\bin\Debug\netcoreapp3.1\HappyTravel.ErrorHandlingContracts.dll
+E:\Projects\happy-travel\HappyTravel.ErrorHandlingContracts\HappyTravel.ErrorHandlingContracts\obj\Debug\netcoreapp3.1\HappyTravel.ErrorHandlingContracts.AssemblyInfoInputs.cache
+E:\Projects\happy-travel\HappyTravel.ErrorHandlingContracts\HappyTravel.ErrorHandlingContracts\obj\Debug\netcoreapp3.1\HappyTravel.ErrorHandlingContracts.AssemblyInfo.cs
+E:\Projects\happy-travel\HappyTravel.ErrorHandlingContracts\HappyTravel.ErrorHandlingContracts\bin\Debug\netcoreapp3.1\HappyTravel.ErrorHandlingContracts.pdb
+E:\Projects\happy-travel\HappyTravel.ErrorHandlingContracts\HappyTravel.ErrorHandlingContracts\obj\Debug\netcoreapp3.1\HappyTravel.ErrorHandlingContracts.csproj.CoreCompileInputs.cache
+E:\Projects\happy-travel\HappyTravel.ErrorHandlingContracts\HappyTravel.ErrorHandlingContracts\obj\Debug\netcoreapp3.1\HappyTravel.ErrorHandlingContracts.dll
+E:\Projects\happy-travel\HappyTravel.ErrorHandlingContracts\HappyTravel.ErrorHandlingContracts\obj\Debug\netcoreapp3.1\HappyTravel.ErrorHandlingContracts.pdb
+E:\Projects\happy-travel\HappyTravel.ErrorHandlingContracts\HappyTravel.ErrorHandlingContracts\obj\Debug\netcoreapp3.1\HappyTravel.ErrorHandlingContracts.csprojAssemblyReference.cache

@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>HappyTravel.ErrorHandling</id>
+    <version>1.0.0</version>
+    <authors>Kirill Taran</authors>
+    <owners>Kirill Taran</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <description>Package Description</description>
+    <dependencies>
+      <group targetFramework=".NETCoreApp3.1" />
+    </dependencies>
+    <frameworkReferences>
+      <group targetFramework=".NETCoreApp3.1">
+        <frameworkReference name="Microsoft.AspNetCore.App" />
+      </group>
+    </frameworkReferences>
+  </metadata>
+  <files>
+    <file src="E:\Projects\happy-travel\HappyTravel.ErrorHandling\HappyTravel.ErrorHandling\bin\Debug\netcoreapp3.1\HappyTravel.ErrorHandling.dll" target="lib\netcoreapp3.1\HappyTravel.ErrorHandling.dll" />
+  </files>
+</package>
