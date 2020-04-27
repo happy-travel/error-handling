@@ -1,9 +1,0 @@
-E:\Projects\happy-travel\HappyTravel.ErrorHandling\HappyTravel.ErrorHandling\bin\Debug\netcoreapp3.1\HappyTravel.ErrorHandling.deps.json
-E:\Projects\happy-travel\HappyTravel.ErrorHandling\HappyTravel.ErrorHandling\bin\Debug\netcoreapp3.1\HappyTravel.ErrorHandling.dll
-E:\Projects\happy-travel\HappyTravel.ErrorHandling\HappyTravel.ErrorHandling\bin\Debug\netcoreapp3.1\HappyTravel.ErrorHandling.pdb
-E:\Projects\happy-travel\HappyTravel.ErrorHandling\HappyTravel.ErrorHandling\obj\Debug\netcoreapp3.1\HappyTravel.ErrorHandling.csprojAssemblyReference.cache
-E:\Projects\happy-travel\HappyTravel.ErrorHandling\HappyTravel.ErrorHandling\obj\Debug\netcoreapp3.1\HappyTravel.ErrorHandling.csproj.CoreCompileInputs.cache
-E:\Projects\happy-travel\HappyTravel.ErrorHandling\HappyTravel.ErrorHandling\obj\Debug\netcoreapp3.1\HappyTravel.ErrorHandling.AssemblyInfoInputs.cache
-E:\Projects\happy-travel\HappyTravel.ErrorHandling\HappyTravel.ErrorHandling\obj\Debug\netcoreapp3.1\HappyTravel.ErrorHandling.AssemblyInfo.cs
-E:\Projects\happy-travel\HappyTravel.ErrorHandling\HappyTravel.ErrorHandling\obj\Debug\netcoreapp3.1\HappyTravel.ErrorHandling.dll
-E:\Projects\happy-travel\HappyTravel.ErrorHandling\HappyTravel.ErrorHandling\obj\Debug\netcoreapp3.1\HappyTravel.ErrorHandling.pdb
