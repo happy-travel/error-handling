@@ -15,8 +15,9 @@ namespace HappyTravel.ErrorHandling
     /// <inheritdoc/>
     public class PublicProblemDetailsFactory : ProblemDetailsFactory
     {
-        public PublicProblemDetailsFactory(IOptions<ApiBehaviorOptions> options)
+        public PublicProblemDetailsFactory(IOptions<ApiBehaviorOptions> options, IHttpContextAccessor? httpContextAccessor = null)
         {
+            _httpContextAccessor = httpContextAccessor; //This isn't safe but I assume the factory is for web projects only, and the accessor is always in place
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
@@ -109,6 +110,43 @@ namespace HappyTravel.ErrorHandling
         }
 
 
+        /// <summary>
+        /// Creates a <see cref="ProblemDetails" /> instance that configures defaults based on values specified in <see cref="ApiBehaviorOptions" />.
+        /// </summary>
+        /// <param name="problemDetails">The existing instance of <see cref="ProblemDetails" />.</param>
+        /// <param name="statusCode">The value for <see cref="ProblemDetails.Status" />.</param>
+        /// <param name="title">The value for <see cref="ProblemDetails.Title"/>.</param>
+        /// <returns>The <see cref="ProblemDetails"/> instance.</returns>
+        public ProblemDetails CreateProblemDetailsWithContext(ProblemDetails problemDetails, int? statusCode = null, string? title = null)
+        {
+            if (_httpContextAccessor is null)
+                throw new ArgumentNullException(nameof(_httpContextAccessor));
+
+            statusCode ??= problemDetails.Status;
+            title ??= problemDetails.Title;
+
+            return CreateProblemDetails(_httpContextAccessor.HttpContext, statusCode, title, problemDetails.Type, problemDetails.Detail);
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="statusCode">The value for <see cref="ProblemDetails.Status" />.</param>
+        /// <param name="title">The existing instance of <see cref="ProblemDetails.Title" />.</param>
+        /// <param name="type">The value for <see cref="ProblemDetails.Type"/>.</param>
+        /// <param name="detail">The value for <see cref="ProblemDetails.Detail"/>.</param>
+        /// <param name="instance">The value for <see cref="ProblemDetails.Instance"/>.</param>
+        /// <returns></returns>
+        public ProblemDetails CreateProblemDetailsWithContext(int? statusCode = null, string? title = null, string? type = null, string? detail = null, string? instance = null)
+        {
+            if (_httpContextAccessor is null)
+                throw new ArgumentNullException(nameof(_httpContextAccessor));
+
+            return CreateProblemDetails(_httpContextAccessor.HttpContext, statusCode, title, type, detail, instance);
+        }
+
+
         private ProblemDetails ApplyProblemDetailsDefaults(HttpContext httpContext, ProblemDetails problemDetails)
         {
             if (problemDetails.Status != null && _options.ClientErrorMapping.TryGetValue(problemDetails.Status.Value, out var clientErrorData))
@@ -150,6 +188,7 @@ namespace HappyTravel.ErrorHandling
         }
 
 
+        private readonly IHttpContextAccessor? _httpContextAccessor;
         private readonly ApiBehaviorOptions _options;
     }
 }
