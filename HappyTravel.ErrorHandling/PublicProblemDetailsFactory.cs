@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 
 namespace HappyTravel.ErrorHandling
@@ -15,7 +16,7 @@ namespace HappyTravel.ErrorHandling
     /// <inheritdoc/>
     public class PublicProblemDetailsFactory : ProblemDetailsFactory
     {
-        public PublicProblemDetailsFactory(IOptions<ApiBehaviorOptions> options, IHttpContextAccessor? httpContextAccessor = null)
+        public PublicProblemDetailsFactory(IOptions<ApiBehaviorOptions>? options, IHttpContextAccessor? httpContextAccessor = null)
         {
             _httpContextAccessor = httpContextAccessor; //This isn't safe but I assume the factory is for web projects only, and the accessor is always in place
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
@@ -34,10 +35,10 @@ namespace HappyTravel.ErrorHandling
         /// <returns>The <see cref="ProblemDetails"/> instance.</returns>
         public ProblemDetails CreateProblemDetails(HttpContext httpContext, HttpStatusCode statusCode, string title, string detail, string? type = null, string? instance = null)
         {
-            if (title == null)
+            if (title is null)
                 throw new ArgumentNullException(nameof(title));
 
-            if (detail == null)
+            if (detail is null)
                 throw new ArgumentNullException(nameof(detail));
 
             return CreateProblemDetails(httpContext, (int) statusCode, title, type, detail, instance);
@@ -62,11 +63,11 @@ namespace HappyTravel.ErrorHandling
 
 
         /// <inheritdoc/>
-        public override ProblemDetails CreateProblemDetails(HttpContext httpContext, int? statusCode = null, string? title = null, string? type = null, string? detail = null,
-            string? instance = null)
+        public override ProblemDetails CreateProblemDetails(HttpContext httpContext, int? statusCode = null, string? title = null, string? type = null,
+            string? detail = null, string? instance = null)
         {
             statusCode ??= (int) HttpStatusCode.InternalServerError;
-            title ??= "Internal Server Error";
+            title ??= ReasonPhrases.GetReasonPhrase(statusCode.Value);
 
             var context = httpContext.Features.Get<IExceptionHandlerFeature>();
             if (context?.Error != null)
@@ -89,7 +90,7 @@ namespace HappyTravel.ErrorHandling
         public override ValidationProblemDetails CreateValidationProblemDetails(HttpContext httpContext, ModelStateDictionary modelStateDictionary, int? statusCode = null,
             string? title = null, string? type = null, string? detail = null, string? instance = null)
         {
-            if (modelStateDictionary == null)
+            if (modelStateDictionary is null)
                 throw new ArgumentNullException(nameof(modelStateDictionary));
 
             statusCode ??= (int) HttpStatusCode.BadRequest;
@@ -103,7 +104,7 @@ namespace HappyTravel.ErrorHandling
                 Type = type
             };
 
-            if (title != null)
+            if (title is not null)
                 problemDetails.Title = title;
 
             return (ValidationProblemDetails) ApplyProblemDetailsDefaults(httpContext, problemDetails);
@@ -120,7 +121,7 @@ namespace HappyTravel.ErrorHandling
         public ProblemDetails CreateProblemDetailsWithContext(ProblemDetails problemDetails, int? statusCode = null, string? title = null)
         {
             if (_httpContextAccessor is null)
-                throw new ArgumentNullException(nameof(_httpContextAccessor));
+                throw new NullReferenceException("Can't get Http Context or its value is null");
 
             statusCode ??= problemDetails.Status;
             title ??= problemDetails.Title;
@@ -141,7 +142,7 @@ namespace HappyTravel.ErrorHandling
         public ProblemDetails CreateProblemDetailsWithContext(int? statusCode = null, string? title = null, string? type = null, string? detail = null, string? instance = null)
         {
             if (_httpContextAccessor is null)
-                throw new ArgumentNullException(nameof(_httpContextAccessor));
+                throw new NullReferenceException("Can't get Http Context or its value is null");
 
             return CreateProblemDetails(_httpContextAccessor.HttpContext, statusCode, title, type, detail, instance);
         }
@@ -149,7 +150,7 @@ namespace HappyTravel.ErrorHandling
 
         private ProblemDetails ApplyProblemDetailsDefaults(HttpContext httpContext, ProblemDetails problemDetails)
         {
-            if (problemDetails.Status != null && _options.ClientErrorMapping.TryGetValue(problemDetails.Status.Value, out var clientErrorData))
+            if (problemDetails.Status is not null && _options.ClientErrorMapping.TryGetValue(problemDetails.Status.Value, out var clientErrorData))
             {
                 problemDetails.Title ??= clientErrorData.Title;
                 problemDetails.Type ??= clientErrorData.Link;

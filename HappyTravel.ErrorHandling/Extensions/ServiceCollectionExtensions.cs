@@ -5,8 +5,9 @@ namespace HappyTravel.ErrorHandling.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddProblemDetailsFactory(this IServiceCollection services)
-            => services.AddTransient<ProblemDetailsFactory, PublicProblemDetailsFactory>()
+        public static IServiceCollection AddProblemDetailsErrorHandling(this IServiceCollection services)
+            => services.AddHttpContextAccessor()
+                .AddTransient<ProblemDetailsFactory, PublicProblemDetailsFactory>()
                 .AddTransient<PublicProblemDetailsFactory>();
     }
 }

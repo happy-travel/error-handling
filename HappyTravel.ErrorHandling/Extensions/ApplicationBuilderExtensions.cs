@@ -1,12 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Net;
-using System.Text.Json;
+using HappyTravel.ErrorHandling.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -14,41 +15,51 @@ namespace HappyTravel.ErrorHandling.Extensions
 {
     public static class ApplicationBuilderExtensions
     {
-        public static IApplicationBuilder UseProblemDetailsExceptionHandler(this IApplicationBuilder app, IWebHostEnvironment env, ILogger? logger = null)
+        public static IApplicationBuilder UseProblemDetailsErrorHandler(this IApplicationBuilder app, IWebHostEnvironment env, ILogger? logger = null,
+            string correlationRequestIdHeader = DefaultRequestHeader)
+        {
+            app.UseMiddleware<ErrorHandlingMiddleware>();
+            app.UseProblemDetailsExceptionHandler(env, logger, correlationRequestIdHeader);
+
+            return app;
+        }
+
+
+        public static IApplicationBuilder UseProblemDetailsExceptionHandler(this IApplicationBuilder app, IWebHostEnvironment env, ILogger? logger = null,
+            string correlationRequestIdHeader = DefaultRequestHeader)
         {
             app.UseExceptionHandler(builder =>
             {
                 builder.Run(
-                async context =>
-                {
-                    context.Response.StatusCode = (int) StatusCode;
-                    context.Response.ContentType = ContentType;
+                    async context =>
+                    {
+                        context.Response.StatusCode = (int) ExceptionStatusCode;
+                        context.Response.ContentType = ContentType;
 
-                    var feature = context.Features.Get<IExceptionHandlerFeature>();
-                    if (feature?.Error is null)
-                        return;
+                        var feature = context.Features.Get<IExceptionHandlerFeature>();
+                        if (feature?.Error is null)
+                            return;
 
-                    var exception = feature.Error;
-                    logger?.LogError(exception, exception.Message);
+                        var exception = feature.Error;
+                        logger?.LogError(exception, exception.Message);
 
-                    var accessor = (IHttpContextAccessor) builder.ApplicationServices.GetService(typeof(IHttpContextAccessor));
-                    var httpContext = accessor?.HttpContext ?? new DefaultHttpContext();
+                        var accessor = (IHttpContextAccessor) builder.ApplicationServices.GetService(typeof(IHttpContextAccessor));
+                        var httpContext = accessor.HttpContext ?? new DefaultHttpContext();
 
-                    var factory = (PublicProblemDetailsFactory) builder.ApplicationServices.GetService(typeof(ProblemDetailsFactory));
-                    var details = factory.CreateProblemDetails(httpContext, StatusCode, StatusCodeTitle, detail: exception.Message);
+                        var title = ReasonPhrases.GetReasonPhrase((int) ExceptionStatusCode);
+                        var factory = (PublicProblemDetailsFactory) builder.ApplicationServices.GetService(typeof(ProblemDetailsFactory));
+                        var details = factory.CreateProblemDetails(httpContext, ExceptionStatusCode, title, exception.Message);
+                        httpContext.Request.Headers.TryGetValue(correlationRequestIdHeader, out var requestId);
+                        details.Extensions.Add(new KeyValuePair<string, object>(correlationRequestIdHeader, requestId));
 
-                    httpContext?.Request.Headers.TryGetValue(CorrelationRequestIdHeader, out var requestId);
-                    details.Extensions.Add(new KeyValuePair<string, object>(CorrelationRequestIdHeader, requestId));
+                        if (!env.IsProduction())
+                            details.Extensions.Add(nameof(exception.StackTrace), exception.StackTrace);
 
-                    if (!env.IsProduction())
-                        details.Extensions.Add(nameof(exception.StackTrace), exception.StackTrace);
+                        foreach (DictionaryEntry entry in exception.Data)
+                            details.Extensions.Add(entry.Key.ToString()!, entry.Value);
 
-                    foreach (DictionaryEntry entry in exception.Data)
-                        details.Extensions.Add(entry.Key.ToString(), entry.Value);
-
-                    var json = JsonSerializer.Serialize(details);
-                    await context.Response.WriteAsync(json);
-                });
+                        await StreamHelper.CopyDetailsTo(context.Response.Body, details);
+                    });
             });
 
             return app;
@@ -56,8 +67,7 @@ namespace HappyTravel.ErrorHandling.Extensions
 
 
         private const string ContentType = "application/json";
-        private const string CorrelationRequestIdHeader = "x-request-id";
-        private const HttpStatusCode StatusCode = HttpStatusCode.InternalServerError;
-        private const string StatusCodeTitle = "Internal Server Error";
+        private const string DefaultRequestHeader = "x-request-id";
+        private const HttpStatusCode ExceptionStatusCode = HttpStatusCode.InternalServerError;
     }
 }
