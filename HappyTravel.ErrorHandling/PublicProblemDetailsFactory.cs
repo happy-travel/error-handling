@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using HappyTravel.ErrorHandling.Extensions;
 using Microsoft.AspNetCore.Diagnostics;
@@ -58,7 +59,9 @@ namespace HappyTravel.ErrorHandling
             statusCode ??= problemDetails.Status;
             title ??= problemDetails.Title;
 
-            return CreateProblemDetails(httpContext, statusCode, title, problemDetails.Type, problemDetails.Detail);
+            var newProblemDetails = CreateProblemDetails(httpContext, statusCode, title, problemDetails.Type, problemDetails.Detail);
+            
+            return AddExtensions(newProblemDetails, problemDetails.Extensions.Select(kvp => (kvp.Key, kvp.Value)));
         }
 
 
@@ -126,7 +129,9 @@ namespace HappyTravel.ErrorHandling
             statusCode ??= problemDetails.Status;
             title ??= problemDetails.Title;
 
-            return CreateProblemDetails(_httpContextAccessor.HttpContext, statusCode, title, problemDetails.Type, problemDetails.Detail);
+            var newProblemDetails = CreateProblemDetails(_httpContextAccessor.HttpContext, statusCode, title, problemDetails.Type, problemDetails.Detail);
+            
+            return AddExtensions(newProblemDetails, problemDetails.Extensions.Select(kvp => (kvp.Key, kvp.Value)));
         }
 
 
@@ -182,13 +187,21 @@ namespace HappyTravel.ErrorHandling
             if (!string.IsNullOrEmpty(requestId))
                 problemDetails.AddRequestId(requestId);
 
-            foreach (var (key, value) in Activity.Current.Baggage)
+            problemDetails = AddExtensions(problemDetails, Activity.Current.Baggage.Select(kvp => (kvp.Key, (object) kvp.Value)));
+            
+            return problemDetails;
+        }
+        
+        
+        private static ProblemDetails AddExtensions(ProblemDetails problemDetails, IEnumerable<(string, object)> extensions)
+        {
+            foreach (var (key, value) in extensions)
                 problemDetails.Extensions.TryAdd(key, value);
             
             return problemDetails;
         }
 
-
+        
         private readonly IHttpContextAccessor? _httpContextAccessor;
         private readonly ApiBehaviorOptions _options;
     }
