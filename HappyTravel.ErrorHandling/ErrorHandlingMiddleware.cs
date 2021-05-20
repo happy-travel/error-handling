@@ -36,7 +36,7 @@ namespace HappyTravel.ErrorHandling
                 if (proxyStream.Length == 0)
                     problemDetails = factory.CreateProblemDetails(httpContext, new ProblemDetails
                     {
-                        Detail = "Details weren't specified",
+                        Detail = "Problem details wasn't specified.",
                         Status = httpContext.Response.StatusCode
                     });
                 else
