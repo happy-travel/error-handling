@@ -44,7 +44,7 @@ namespace HappyTravel.ErrorHandling
 
                 var enrichedDetails = factory.CreateProblemDetailsWithContext(problemDetails!);
                 
-                await StreamHelper.Rewrite(proxyStream, enrichedDetails);
+                await StreamHelper.RewriteDetailsTo(proxyStream, enrichedDetails);
             }
             catch (Exception ex)
             {
@@ -54,7 +54,7 @@ namespace HappyTravel.ErrorHandling
                     Status = (int) HttpStatusCode.InternalServerError
                 });
                 
-                await StreamHelper.Rewrite(proxyStream, problemDetails);
+                await StreamHelper.RewriteDetailsTo(proxyStream, problemDetails);
             }
             finally
             {

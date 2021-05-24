@@ -20,17 +20,17 @@ namespace HappyTravel.ErrorHandling.Infrastructure
         }
         
         
-        internal static async Task Write(Stream stream, ProblemDetails problemDetails)
+        internal static async Task WriteDetailsTo(Stream stream, ProblemDetails problemDetails)
         {
             var encodedJson = Serialize(problemDetails);
             await stream.WriteAsync(encodedJson);
         }
 
         
-        internal static async Task Rewrite(Stream stream, ProblemDetails problemDetails)
+        internal static async Task RewriteDetailsTo(Stream stream, ProblemDetails problemDetails)
         {
             stream.SetLength(0);
-            await Write(stream, problemDetails);
+            await WriteDetailsTo(stream, problemDetails);
         }
 
 
