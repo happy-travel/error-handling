@@ -19,34 +19,32 @@ namespace HappyTravel.ErrorHandling
 
         public async Task Invoke(HttpContext httpContext, PublicProblemDetailsFactory factory)
         {
-            var originalBody = httpContext.Response.Body;
+            await using var proxyStream = new MemoryStream();
+            var originalBody = SwapBodyStream(httpContext.Response, proxyStream);
+
             try
             {
-                await using var proxyStream = new MemoryStream();
-                httpContext.Response.Body = proxyStream;
                 await _next(httpContext);
                 
-                proxyStream.Position = 0;
+                proxyStream.Seek(0, SeekOrigin.Begin);
 
                 if (httpContext.Response.StatusCode < (int) HttpStatusCode.BadRequest ||
                     httpContext.Response.StatusCode == (int) HttpStatusCode.InternalServerError)
-                {
-                    await proxyStream.CopyToAsync(originalBody);
                     return;
-                }
 
-                var problemDetails = httpContext.Response.Body switch
-                {
-                    null => factory.CreateProblemDetails(httpContext, new ProblemDetails
+                ProblemDetails? problemDetails;
+                if (proxyStream.Length == 0)
+                    problemDetails = factory.CreateProblemDetails(httpContext, new ProblemDetails
                     {
                         Detail = "Problem details wasn't specified.",
                         Status = httpContext.Response.StatusCode
-                    }),
-                    _ => await JsonSerializer.DeserializeAsync<ProblemDetails>(httpContext.Response.Body)
-                };
+                    });
+                else
+                    problemDetails = await JsonSerializer.DeserializeAsync<ProblemDetails>(proxyStream);
 
-                var enrichedDetails = factory.CreateProblemDetailsWithContext(problemDetails);
-                await StreamHelper.CopyDetailsTo(originalBody, enrichedDetails);
+                var enrichedDetails = factory.CreateProblemDetailsWithContext(problemDetails!);
+                
+                await StreamHelper.RewriteDetailsTo(proxyStream, enrichedDetails);
             }
             catch (Exception ex)
             {
@@ -55,15 +53,34 @@ namespace HappyTravel.ErrorHandling
                     Detail = ex.Message,
                     Status = (int) HttpStatusCode.InternalServerError
                 });
-                await StreamHelper.CopyDetailsTo(originalBody, problemDetails);
+                
+                await StreamHelper.RewriteDetailsTo(proxyStream, problemDetails);
             }
-            finally 
+            finally
             {
-                httpContext.Response.Body = originalBody;
+                await PutBodyStreamBack(httpContext.Response, originalBody);
             }
         }
 
 
+        private Stream SwapBodyStream(HttpResponse response, Stream stream)
+        {
+            var body = response.Body;
+            response.Body = stream;
+            
+            return body;
+        }
+
+
+        private async Task PutBodyStreamBack(HttpResponse response, Stream bodyStream)
+        {
+            response.Body.Seek(0, SeekOrigin.Begin);
+            response.Headers.ContentLength = response.Body.Length;
+            await response.Body.CopyToAsync(bodyStream);
+            response.Body = bodyStream;
+        }
+
+        
         private readonly RequestDelegate _next;
     }
 }
